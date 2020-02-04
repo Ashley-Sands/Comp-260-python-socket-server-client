@@ -21,6 +21,8 @@ def client_task(client):
 
         time.sleep(0.5)
 
+    print("Ending client task")
+
 if __name__ == "__main__":
 
     socket_inst = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,5 +38,9 @@ if __name__ == "__main__":
         client, addr = socket_inst.accept()
         socket_protocol = protocol.Protocol(client, True)
 
-        threads[addr] = threading.Thread( target=client_task, args=(socket_protocol,) )
-        threads[addr].start()
+        if addr not in threads:
+            threads[addr] = threading.Thread( target=client_task, args=(socket_protocol,) )
+            threads[addr].start()
+        else:
+            print("Error: rejecting connection, they already have a thread")
+            client.close()

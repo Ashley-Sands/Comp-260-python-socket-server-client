@@ -1,6 +1,5 @@
 import datetime
 
-
 class Protocol:
     """ The protocol used by the socket
     <size of message [2 bytes]><timestamp in mills [2 bytes]><message [size of message bytes]>
@@ -8,7 +7,7 @@ class Protocol:
     """
 
     MESSAGE_LEN_PACKET_SIZE = 2
-    TIMESTAMP_PACKET_SIZE = 2
+    TIMESTAMP_PACKET_SIZE = 4
     BYTE_ORDER = "big"
 
     def __init__(self, socket, host=False):
@@ -60,13 +59,13 @@ class Protocol:
             return False
 
         message_length = len(message).to_bytes(self.MESSAGE_LEN_PACKET_SIZE, self.BYTE_ORDER)
-        message_timestamp = int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
-        message_timestamp.to_bytes(self.TIMESTAMP_PACKET_SIZE, self.BYTE_ORDER)
+        message_timestamp = int((datetime.datetime.utcnow() - datetime.datetime(1970,1,1)).total_seconds())
+        message_timestamp = message_timestamp.to_bytes(self.TIMESTAMP_PACKET_SIZE, self.BYTE_ORDER)
 
         try:
-            self.socket.send(message_length)
-            self.socket.send(message_timestamp)
-            self.socket.send(message.encode())
+            self.socket.send( message_length )
+            self.socket.send( message_timestamp )
+            self.socket.send( message.encode() )
         except Exception as e:
             print(e)
             self.valid = False
