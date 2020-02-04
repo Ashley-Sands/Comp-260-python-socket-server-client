@@ -7,7 +7,7 @@ class Protocol:
     """
 
     MESSAGE_LEN_PACKET_SIZE = 2
-    TIMESTAMP_PACKET_SIZE = 4
+    TIMESTAMP_PACKET_SIZE = 8
     BYTE_ORDER = "big"
 
     def __init__(self, socket, host=False):
@@ -16,6 +16,8 @@ class Protocol:
         self.connected = host
         self.valid = self.socket is not None
         self.message = ""
+        self.timestamp_sent = -1
+        self.timestamp_received = -1
 
     def is_valid(self, printMessage=False):
 
@@ -59,7 +61,7 @@ class Protocol:
             return False
 
         message_length = len(message).to_bytes(self.MESSAGE_LEN_PACKET_SIZE, self.BYTE_ORDER)
-        message_timestamp = int((datetime.datetime.utcnow() - datetime.datetime(1970,1,1)).total_seconds())
+        message_timestamp = int((datetime.datetime.utcnow() - datetime.datetime(1970,1,1)).total_seconds() * 1000)
         message_timestamp = message_timestamp.to_bytes(self.TIMESTAMP_PACKET_SIZE, self.BYTE_ORDER)
 
         try:
@@ -89,8 +91,8 @@ class Protocol:
 
             # the next few bytes is our time stamp
             data = self.socket.recv(self.TIMESTAMP_PACKET_SIZE)
-            message_timestamp = int.from_bytes(data, self.BYTE_ORDER)
-
+            self.timestamp_sent = int.from_bytes(data, self.BYTE_ORDER)
+            self.timestamp_received = int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
             # receive the message
             self.message = self.socket.recv(message_len).decode("utf-8")
 
