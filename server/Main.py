@@ -11,6 +11,7 @@ accepting_conn_thread = None
 accepting_connections = True
 thread_lock = threading.Lock()
 
+
 def accept_clients(socket_):
     global accepting_connections
     print("starting to accept clients")
@@ -27,7 +28,7 @@ def accept_clients(socket_):
 
             clients["client" + str(client_count)] = Client(client)
             clients["client" + str(client_count)].start()
-
+            print("new client accepted!")
             thread_lock.release()
         except Exception as e:
             print("error on socket, ", e)
@@ -36,6 +37,8 @@ def accept_clients(socket_):
             accepting_connections = False
             thread_lock.release()
             break
+
+        time.sleep(0.5)
 
     print("that's enough clients for now")
 
@@ -54,8 +57,8 @@ if __name__ == "__main__":
 
     print ("\nwaiting for connections...")
 
-    socket_inst.close()
+    #socket_inst.close()
 
     # process all the data :)
-    #while True:
-    #    pass
+    while True:
+        pass

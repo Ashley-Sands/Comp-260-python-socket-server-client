@@ -1,7 +1,7 @@
 import datetime
 import queue as q
 import threading
-
+import time
 # server
 class Client:
     """ The protocol used by the socket
@@ -38,17 +38,21 @@ class Client:
         self.started = True
 
     def inbound(self, socket):
+        print("-starting inbound")
         # receive messages until it fails :/
         while self.is_valid():
             if not self.receive():
                 return
+            time.sleep(0.5)
 
     def outbound(self, socket):
+        print("-starting outbound")
         # send messages until its fails :/
         while self.is_valid():
             if not self.send_queue.empty():
                 if not self.send():
                     return
+                time.sleep(0.5)
 
     def is_valid(self, print_message=False):
         """ Thread safe method to see if the client is valid
