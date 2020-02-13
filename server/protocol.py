@@ -1,13 +1,14 @@
 import datetime
 
+
+# server
 class Protocol:
     """ The protocol used by the socket
-    <size of message [2 bytes]><timestamp in mills [2 bytes]><message [size of message bytes]>
+    <size of message [2 bytes]><message [size of message bytes]>
     max message size: 65,535 bytes (or chars)
     """
 
     MESSAGE_LEN_PACKET_SIZE = 2
-    TIMESTAMP_PACKET_SIZE = 8
     BYTE_ORDER = "big"
 
     def __init__(self, socket, host=False):
@@ -61,12 +62,9 @@ class Protocol:
             return False
 
         message_length = len(message).to_bytes(self.MESSAGE_LEN_PACKET_SIZE, self.BYTE_ORDER)
-        message_timestamp = int((datetime.datetime.utcnow() - datetime.datetime(1970,1,1)).total_seconds() * 1000)
-        message_timestamp = message_timestamp.to_bytes(self.TIMESTAMP_PACKET_SIZE, self.BYTE_ORDER)
 
         try:
             self.socket.send( message_length )
-            self.socket.send( message_timestamp )
             self.socket.send( message.encode() )
         except Exception as e:
             print(e)
@@ -85,14 +83,10 @@ class Protocol:
             return False
 
         try:
-            # receive the first bytes few bytes for our message len
+            # receive the first bytes couple of bytes for our message len
             data = self.socket.recv(self.MESSAGE_LEN_PACKET_SIZE)
             message_len = int.from_bytes(data, self.BYTE_ORDER)
 
-            # the next few bytes is our time stamp
-            data = self.socket.recv(self.TIMESTAMP_PACKET_SIZE)
-            self.timestamp_sent = int.from_bytes(data, self.BYTE_ORDER)
-            self.timestamp_received = int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
             # receive the message
             self.message = self.socket.recv(message_len).decode("utf-8")
 
