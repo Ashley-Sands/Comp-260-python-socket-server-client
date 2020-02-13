@@ -3,7 +3,7 @@ import queue as q
 import threading
 
 # server
-class Client: # client... ??
+class Client:
     """ The protocol used by the socket
     <size of message [2 bytes]><message [size of message bytes]>
     max message size: 65,535 bytes (or chars)
@@ -12,16 +12,17 @@ class Client: # client... ??
     MESSAGE_LEN_PACKET_SIZE = 2
     BYTE_ORDER = "big"
 
-    def __init__(self, socket, host=False):
+    def __init__(self, socket):
 
         self.socket = socket
-        self.valid = self.socket is not None
+        self._valid = self.socket is not None   # unsafe, use set and is valid functions
 
         self.received_queue = q.Queue()
         self.send_queue = q.Queue()
 
         self.inbound_thread = threading.Thread(target=self.inbound, args=(socket,))
         self.outbound_thread = threading.Thread(target=self.outbound, args=(socket,))
+        self.thread_lock = threading.Lock()
 
     def start(self):
 
@@ -46,11 +47,33 @@ class Client: # client... ??
                     return
 
     def is_valid(self, print_message=False):
+        """ Thread safe method to see if the client is valid
 
-        if print_message and not self.valid:
+        :param print_message: should a error message be displayed
+        :return: True if the client is valid otherwise false
+        """
+
+        self.thread_lock.acquire()
+
+        valid = self._valid and self.socket is not None
+
+        self.thread_lock.release()
+
+        if print_message and not valid:
             print("Error: Invalid Socket")
 
-        return self.valid and self.socket is not None
+        return valid
+
+    def set_is_vaild(self, vaild):
+        """ Thread safe method to set is vaild
+
+        :param vaild: is the socket vaild?
+        """
+        self.thread_lock.acquire()
+
+        self._valid = vaild
+
+        self.thread_lock.release()
 
     def send(self):
         """ Send message from the start of the send que
@@ -75,7 +98,7 @@ class Client: # client... ??
             self.socket.send( message.encode() )
         except Exception as e:
             print(e)
-            self.valid = False
+            self.set_is_vaild( False )
             return False
 
         return True
@@ -103,7 +126,7 @@ class Client: # client... ??
 
         except Exception as e:
             print(e)
-            self.valid = False
+            self.set_is_vaild( False )
             return False
 
         return True
