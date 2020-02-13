@@ -15,13 +15,15 @@ class Client:
     def __init__(self, socket):
 
         self.socket = socket
-        self._valid = self.socket is not None   # unsafe, use set and is valid functions
+        self.started = False
 
+        self._valid = self.socket is not None   # unsafe, use set and is valid functions
         self.received_queue = q.Queue()
         self.send_queue = q.Queue()
 
         self.inbound_thread = threading.Thread(target=self.inbound, args=(socket,))
         self.outbound_thread = threading.Thread(target=self.outbound, args=(socket,))
+
         self.thread_lock = threading.Lock()
 
     def start(self):
@@ -32,6 +34,8 @@ class Client:
 
         self.inbound_thread.start()
         self.outbound_thread.start()
+
+        self.started = True
 
     def inbound(self, socket):
         # receive messages until it fails :/
@@ -55,7 +59,7 @@ class Client:
 
         self.thread_lock.acquire()
 
-        valid = self._valid and self.socket is not None
+        valid = self.socket is not None and self._valid and self.started
 
         self.thread_lock.release()
 
@@ -130,3 +134,6 @@ class Client:
             return False
 
         return True
+
+    def close(self):
+        pass
