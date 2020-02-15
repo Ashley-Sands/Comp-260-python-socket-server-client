@@ -32,10 +32,10 @@ class Client:
             print("Error: can not start client, already alive")
             return
 
+        self.started = True
+
         self.inbound_thread.start()
         self.outbound_thread.start()
-
-        self.started = True
 
     def inbound(self, socket):
         print("-starting inbound")
@@ -44,6 +44,7 @@ class Client:
             if not self.receive():
                 return
             time.sleep(0.5)
+            self.send_queue.put("Cheers i'll pass that on :)")
 
     def outbound(self, socket):
         print("-starting outbound")
@@ -121,13 +122,22 @@ class Client:
             return False
 
         try:
+
             # receive the first bytes couple of bytes for our message len
             data = self.socket.recv(self.MESSAGE_LEN_PACKET_SIZE)
             message_len = int.from_bytes(data, self.BYTE_ORDER)
+            print("\n-receiving ", message_len, " len ", data)
+
+            # if recv returns 0 bytes the socket has been disconnected
+            # see https://docs.python.org/3.7/howto/sockets.html for more info
+            # search "When a recv returns 0 bytes" on page.
+            if len(data) == 0:
+                return False
 
             # receive the message
             message = self.socket.recv(message_len).decode("utf-8")
             self.received_queue.put(message, block=True, timeout=None)
+            print("\n-received ", message )
 
             # self.timestamp_received = int(
             #    (datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1) ).total_seconds())
