@@ -3,6 +3,7 @@ import time
 import threading
 
 from client import Client
+from message import Message
 
 clients = {}
 client_count = 0
@@ -13,7 +14,7 @@ thread_lock = threading.Lock()
 
 
 def accept_clients(socket_):
-    global accepting_connections
+    global accepting_connections, client_count
     print("starting to accept clients")
 
     while True:
@@ -28,6 +29,7 @@ def accept_clients(socket_):
 
             clients["client" + str(client_count)] = Client(client)
             clients["client" + str(client_count)].start()
+            client_count += 1
             print("new client accepted!")
             thread_lock.release()
         except Exception as e:
@@ -41,6 +43,13 @@ def accept_clients(socket_):
         time.sleep(0.5)
 
     print("that's enough clients for now")
+
+
+def send_message(msg):
+
+    for k in [*clients]:
+        if k != msg.fromClientId:
+            clients[k].send_queue.put(msg.message)
 
 
 if __name__ == "__main__":
@@ -61,4 +70,15 @@ if __name__ == "__main__":
 
     # process all the data :)
     while True:
-        pass
+        for k in [*clients]:
+            # clean up any lost clients
+            if not clients[k].is_valid():
+                del[clients[k]]
+                continue
+
+            try:
+                while not clients[k].received_queue.empty():
+                    send_message(Message(k, clients[k].received_queue.get(block=True, timeout=None)))
+            except:
+                pass
+        time.sleep(0.5)
