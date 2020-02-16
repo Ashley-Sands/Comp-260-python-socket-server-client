@@ -142,7 +142,7 @@ public class SocketClient : MonoBehaviour
             sendThread.Start();
         }
 
-        GetMessages();
+        //GetMessages();
         
     }
 
