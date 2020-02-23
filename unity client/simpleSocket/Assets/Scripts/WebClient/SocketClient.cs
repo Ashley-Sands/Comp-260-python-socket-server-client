@@ -279,7 +279,15 @@ public class SocketClient : MonoBehaviour
 
     private void OnDestroy ()
     {
-        Debug.LogFormat( " preDisconnect rt: {0} st: {1} c: {2} con: {3}", receiveThread.IsAlive, sendThread.IsAlive, connectThread.IsAlive, socket.Connected );
+        Debug.LogFormat( " preDisconnect rt: {0} st: {1} c: {2} con: {3}", receiveThread?.IsAlive, sendThread?.IsAlive, connectThread?.IsAlive, socket?.Connected );
+
+        if ( Connecting )
+        {
+            Connecting = false;
+            // wait for the thread to exit.
+            connectThread.Join();
+
+        }
 
         Disconnect();
 
@@ -301,15 +309,7 @@ public class SocketClient : MonoBehaviour
 
         }
 
-        if ( Connecting )
-        {
-            Connecting = false;
-            // wait for the thread to exit.
-            connectThread.Join();
-
-        }
-
-        Debug.LogFormat( " rt: {0} st: {1} c: {2} con: {3}", receiveThread.IsAlive, sendThread.IsAlive, connectThread.IsAlive, socket.Connected );
+        Debug.LogFormat( " rt: {0} st: {1} c: {2} con: {3}", receiveThread?.IsAlive, sendThread?.IsAlive, connectThread?.IsAlive, socket?.Connected );
 
 
     }
