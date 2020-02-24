@@ -2707,7 +2707,7 @@ BoxCollider:
   m_GameObject: {fileID: 299081477}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -6004,6 +6004,7 @@ GameObject:
   - component: {fileID: 1257126750}
   - component: {fileID: 1257126749}
   - component: {fileID: 1257126748}
+  - component: {fileID: 1257126751}
   m_Layer: 0
   m_Name: Main Camera (Orth)
   m_TagString: MainCamera
@@ -6075,6 +6076,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 26.92, y: 45, z: 0}
+--- !u!114 &1257126751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257126747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c80921f07bc30e140a6baf1fe29bd341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotateSpeed: 12
+  moveSpeed: 12
+  zoomSpeed: 6
 --- !u!1 &1284665470
 GameObject:
   m_ObjectHideFlags: 0
